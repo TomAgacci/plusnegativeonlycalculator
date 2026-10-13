@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Basic Scientific Calculator</title>
+<style>
+  body {
+    background:#d9d9d9;
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    padding-top:40px;
+  }
+  .calc-body {
+    width:360px;
+    background:#333;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0px 0px 20px #000;
+  }
+  .solar {
+    height:40px;
+    background:linear-gradient(90deg,#111 0%,#222 50%,#111 100%);
+    border-radius:6px;
+    margin-bottom:12px;
+  }
+  .display {
+    background:#b7c59f;
+    height:60px;
+    border-radius:6px;
+    margin-bottom:12px;
+    font-size:32px;
+    padding:10px;
+    text-align:right;
+    font-family:'Courier New', monospace;
+    overflow:hidden;
+  }
+  .btn-grid {
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+  }
+  button {
+    background:#555;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    padding:14px;
+    font-size:18px;
+    cursor:pointer;
+    box-shadow:0px 2px 4px #000;
+  }
+  button:active { background:#777; }
+  .wide { grid-column:span 2; }
+</style>
+</head>
+<body>
+
+<div class="calc-body">
+
+  <div class="solar"></div>
+
+  <div id="display" class="display">0</div>
+
+  <div class="btn-grid">
+
+    <!-- Scientific row -->
+    <button onclick="func('sin')">sin</button>
+    <button onclick="func('cos')">cos</button>
+    <button onclick="func('tan')">tan</button>
+    <button onclick="func('log')">log</button>
+    <button onclick="func('ln')">ln</button>
+
+    <button onclick="func('exp')">exp</button>
+    <button onclick="func('pow2')">x²</button>
+    <button onclick="func('sqrt')">√x</button>
+    <button onclick="func('inv')">1/x</button>
+    <button onclick="press('(')">(</button>
+
+    <button onclick="press(')')">)</button>
+    <button onclick="press('7')">7</button>
+    <button onclick="press('8')">8</button>
+    <button onclick="press('9')">9</button>
+    <button onclick="press('-')">−</button>
+
+    <button onclick="press('4')">4</button>
+    <button onclick="press('5')">5</button>
+    <button onclick="press('6')">6</button>
+    <button onclick="press('+')">+</button>
+    <button onclick="press('/')">/</button>
+
+    <button onclick="press('1')">1</button>
+    <button onclick="press('2')">2</button>
+    <button onclick="press('3')">3</button>
+    <button onclick="calculate()">=</button>
+    <button onclick="press('*')">*</button>
+
+    <button onclick="press('0')">0</button>
+    <button onclick="press('.')">.</button>
+    <button class="wide" onclick="clearAll()">CLEAR</button>
+
+  </div>
+</div>
+
+<script>
+  let expr = "";
+
+  function updateDisplay(v){
+    document.getElementById("display").textContent = v;
+  }
+
+  function press(n){
+    expr += n;
+    updateDisplay(expr);
+  }
+
+  function clearAll(){
+    expr = "";
+    updateDisplay("0");
+  }
+
+  // Scientific functions on current value
+  function func(f){
+    if(expr === "") return;
+    let x = parseFloat(expr);
+    let r = 0;
+
+    if(f === "sin")  r = Math.sin(x);
+    if(f === "cos")  r = Math.cos(x);
+    if(f === "tan")  r = Math.tan(x);
+    if(f === "log")  r = Math.log10(x);
+    if(f === "ln")   r = Math.log(x);
+    if(f === "exp")  r = Math.exp(x);
+    if(f === "pow2") r = x*x;
+    if(f === "sqrt") r = Math.sqrt(x);
+    if(f === "inv")  r = 1/x;
+
+    expr = "" + r;
+    updateDisplay(expr);
+  }
+
+  function calculate(){
+    try {
+      let r = eval(expr);
+      expr = "" + r;
+      updateDisplay(r);
+    } catch {
+      updateDisplay("ERR");
+      expr = "";
+    }
+  }
+</script>
+
+</body>
+</html>
