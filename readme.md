@@ -1,4 +1,4 @@
-This is a solar calculator emulator which scripting which only uses addition and subtraciton. To be used to forming transistor function in devices.
+This is a solar calculator emulator which scripting which only uses addition and subtraction. To be used to forming transistor function in devices.
 
 This work is licensed under a Creative Commons 
 Attribution–NonCommercial–NoDerivatives 4.0 License.
