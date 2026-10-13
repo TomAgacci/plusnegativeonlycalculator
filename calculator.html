@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tama Solar Scientific Calculator</title>
+<style>
+  body {
+    background: #d9d9d9;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding-top: 40px;
+  }
+
+  .calc-body {
+    width: 320px;
+    background: #333;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0px 0px 20px #000;
+  }
+
+  .solar {
+    height: 40px;
+    background: linear-gradient(90deg, #111 0%, #222 50%, #111 100%);
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  .display {
+    background: #b7c59f;
+    height: 60px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 32px;
+    padding: 10px;
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+  }
+
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  button {
+    background: #555;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0px 2px 4px #000;
+  }
+
+  button:active {
+    background: #777;
+  }
+
+  .wide {
+    grid-column: span 2;
+  }
+
+  .script-box {
+    margin-top: 20px;
+    background: #222;
+    color: #0f0;
+    padding: 10px;
+    border-radius: 6px;
+    font-family: monospace;
+    height: 80px;
+    width: 100%;
+  }
+
+  .run-btn {
+    margin-top: 10px;
+    width: 100%;
+    background: #006600;
+  }
+</style>
+</head>
+<body>
+
+<div class="calc-body">
+
+  <div class="solar"></div>
+
+  <div id="display" class="display">0</div>
+
+  <div class="btn-grid">
+    <button onclick="press('7')">7</button>
+    <button onclick="press('8')">8</button>
+    <button onclick="press('9')">9</button>
+    <button onclick="doOp('DIV')">÷</button>
+
+    <button onclick="press('4')">4</button>
+    <button onclick="press('5')">5</button>
+    <button onclick="press('6')">6</button>
+    <button onclick="doOp('MUL')">×</button>
+
+    <button onclick="press('1')">1</button>
+    <button onclick="press('2')">2</button>
+    <button onclick="press('3')">3</button>
+    <button onclick="doOp('SUB')">−</button>
+
+    <button onclick="press('0')">0</button>
+    <button onclick="press('.')">.</button>
+    <button onclick="calculate()">=</button>
+    <button onclick="doOp('ADD')">+</button>
+
+    <button class="wide" onclick="doFunc('SQR')">x²</button>
+    <button class="wide" onclick="doFunc('SQRT')">√x</button>
+
+    <button class="wide" onclick="doFunc('SIN')">sin</button>
+    <button class="wide" onclick="doFunc('COS')">cos</button>
+
+    <button class="wide" onclick="doFunc('EXP')">exp</button>
+    <button class="wide" onclick="doFunc('LOG')">ln</button>
+
+    <button class="wide" onclick="clearAll()">CLEAR</button>
+  </div>
+
+  <textarea id="script" class="script-box"
+    placeholder="Tama Script Example:
+MUL 3 4
+SQRT 10
+SIN 1.57"></textarea>
+
+  <button class="run-btn" onclick="runScript()">Run Script</button>
+
+</div>
+
+<script>
+let current = "";
+let stored = null;
+let operation = null;
+
+function updateDisplay(v) {
+  document.getElementById("display").textContent = v;
+}
+
+function press(n) {
+  current += n;
+  updateDisplay(current);
+}
+
+function clearAll() {
+  current = "";
+  stored = null;
+  operation = null;
+  updateDisplay("0");
+}
+
+// --- Tama Engine (add/sub only logic) ---
+
+function M(a,b) {
+  let sign = (a < 0) ^ (b < 0) ? -1 : 1;
+  a = Math.abs(a);
+  b = Math.abs(b);
+  let sum = 0;
+  for (let i = 0; i < Math.floor(b); i++) sum += a;
+  sum += a * (b - Math.floor(b));
+  return sign * sum;
+}
+
+function D(a,b) {
+  let sign = (a < 0) ^ (b < 0) ? -1 : 1;
+  a = Math.abs(a);
+  b = Math.abs(b);
+  let count = 0;
+  while (a >= b) {
+    a -= b;
+    count++;
+  }
+  return sign * (count + a/b);
+}
+
+function S(n) {
+  n = Math.floor(Math.abs(n));
+  let sum = 0, odd = 1;
+  for (let i = 0; i < n; i++) {
+    sum += odd;
+    odd += 2;
+  }
+  return sum;
+}
+
+function R(N) {
+  if (N < 0) return NaN;
+  let g = 0;
+  while (S(g) <= N) g++;
+  g--;
+  return g;
+}
+
+function SIN(x) {
+  let sum = 0;
+  for (let k = 0; k < 10; k++) {
+    let p = Math.pow(x, 2*k+1);
+    let d = fact(2*k+1);
+    let t = p/d;
+    sum += (k % 2 === 0 ? t : -t);
+  }
+  return sum;
+}
+
+function COS(x) {
+  let sum = 0;
+  for (let k = 0; k < 10; k++) {
+    let p = Math.pow(x, 2*k);
+    let d = fact(2*k);
+    let t = p/d;
+    sum += (k % 2 === 0 ? t : -t);
+  }
+  return sum;
+}
+
+function EXP(x) {
+  let sum = 0;
+  for (let k = 0; k < 10; k++) {
+    let p = Math.pow(x, k);
+    let d = fact(k);
+    sum += p/d;
+  }
+  return sum;
+}
+
+function LOG(a) {
+  let n = 0;
+  let step = 0.1;
+  for (let i = 0; i < 100; i++) {
+    if (EXP(n + step) <= a) n += step;
+    else step /= 10;
+  }
+  return n;
+}
+
+function fact(n) {
+  if (n <= 1) return 1;
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+
+// --- Calculator operations ---
+
+function doOp(op) {
+  stored = parseFloat(current);
+  current = "";
+  operation = op;
+}
+
+function calculate() {
+  let a = stored;
+  let b = parseFloat(current);
+  let r = 0;
+
+  if (operation === "ADD") r = a + b;
+  if (operation === "SUB") r = a - b;
+  if (operation === "MUL") r = M(a,b);
+  if (operation === "DIV") r = D(a,b);
+
+  updateDisplay(r);
+  current = "" + r;
+}
+
+function doFunc(f) {
+  let a = parseFloat(current);
+  let r = 0;
+
+  if (f === "SQR") r = S(a);
+  if (f === "SQRT") r = R(a);
+  if (f === "SIN") r = SIN(a);
+  if (f === "COS") r = COS(a);
+  if (f === "EXP") r = EXP(a);
+  if (f === "LOG") r = LOG(a);
+
+  updateDisplay(r);
+  current = "" + r;
+}
+
+// --- Tama Script Runner ---
+
+function runScript() {
+  let lines = document.getElementById("script").value.trim().split("\n");
+  let out = "";
+  for (let line of lines) {
+    let p = line.trim().split(" ");
+    let cmd = p[0].toUpperCase();
+    let a = parseFloat(p[1]);
+    let b = p[2] ? parseFloat(p[2]) : null;
+    let r = "ERR";
+
+    if (cmd === "ADD") r = a + b;
+    if (cmd === "SUB") r = a - b;
+    if (cmd === "MUL") r = M(a,b);
+    if (cmd === "DIV") r = D(a,b);
+    if (cmd === "SQR") r = S(a);
+    if (cmd === "SQRT") r = R(a);
+    if (cmd === "SIN") r = SIN(a);
+    if (cmd === "COS") r = COS(a);
+    if (cmd === "EXP") r = EXP(a);
+    if (cmd === "LOG") r = LOG(a);
+
+    out += `${line} => ${r}\n`;
+  }
+  updateDisplay(out.split("\n").slice(-1)[0].split("=>")[1].trim());
+}
+</script>
+
+</body>
+</html>
